@@ -1,0 +1,294 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/simple.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h1>Functional Programming in F#</h1>
+					<h2>Daniel Wallis</h2>
+				
+
+
+
+
+				<section>
+					<h1>What is Functional Programming?</h1>
+					A <b>programming paradigm</b> that treats computation as the evaluation of mathematical functions and <b>avoids changing-state and mutable data</b>
+				
+
+
+
+
+				<section>
+					<h1>What are the benefits?</h1>
+					<ul>
+						<li>Calling a function twice with the same arguments produces the same result</li>
+						<li>Immutability by default</li>
+						<li>No null checking</li>
+						<li>More concise syntax</li>
+						<li>Less boilerplate</li>
+					</ul>
+				
+
+
+
+
+				<section>
+					<h1>Why F#?</h1>
+					<ul>
+						<li>Familiar tooling</li>
+						<li>Interoperability with C#</li>
+						<li>Use of NuGet and other DLLs</li>
+						<li>Use of existing frameworks (e.g. ASP.NET MVC)</li>
+					</ul>
+				
+
+
+
+
+				<section>
+					<h1>Show me the code!</h1>
+					<div style="float:left;width:50%;">
+						<pre><code class="fsharp hljs" data-trim>					
+[&ltEntryPoint&gt]
+let main argv =
+    printfn "Hello, World!"
+    0
+						</code></pre>
+						<div class="fragment">
+							<pre><code class="fsharp hljs" data-trim>
+type Person = {Name:string; Age:string;}
+
+let MakePerson name =
+    {Name=name; Age=0;}
+							</code></pre>
+							Equals and HashCode implemented by default!
+						</div>				
+					</div>
+					<div style="float:right;width:50%;">
+						<pre class="fragment"><code class="hljs" data-trim>	
+public class Person
+{
+    public Person(string name, int age)
+    {
+        Name = name;
+        Age = age;
+    }
+
+    public int Age { get; }
+
+    public string Name { get; }
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != this.GetType()) return false;
+        var other = (Person) obj;
+        return Age == other.Age && string.Equals(Name, other.Name);
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            return (Age*397) ^ (Name?.GetHashCode() ?? 0);
+        }
+    }
+}    
+	    				</code></pre>
+	    			</div>
+				
+
+
+
+
+				<section>
+					<h1>Show me the code!</h1>
+					<pre><code class="fsharp hljs" data-trim>					
+open System
+
+type Person = {Name:string; Age:int;}
+
+let MakePerson name =
+    {Name=name; Age=0;}
+
+let GrowOlder person = 
+    {person with Age=person.Age+1}
+
+[&ltEntryPoint&gt]
+let main argv =        
+    printfn "Hello, World!"
+    let person1 = {Name="Bob";Age=52;}
+    let person2 = {Name="Bob";Age=52;}
+    printfn "%i" (person1.GetHashCode())
+    printfn "%i" (person2.GetHashCode())
+    printfn "%b" (person1=person2)        
+    Console.ReadKey() |> ignore
+    0
+					</code></pre>
+				
+
+
+
+
+				<section>
+					<h1>Show me the code!</h1>
+					Tony Hoare (inventor of the null reference): 
+					<blockquote>“I call it my billion-dollar mistake.
+					<br/>…
+					<br/>This has led to innumerable errors, vulnerabilities, and system crashes, which have probably caused a billion dollars of pain and damage in the last forty years.”
+					</blockquote>	
+				
+
+
+
+				
+				<section>
+					<h1>Show me the code!</h1>
+					<pre><code class="fsharp hljs" data-trim>								
+let PrintPerson person = 
+    printfn "Name:%s, Age:%i" person.Name person.Age
+
+let NullExample() = 
+    PrintPerson null
+
+let RealExample() = 
+    PrintPerson {Name="Bob"; Age=52;}
+					</code></pre>
+					<div class="fragment">
+						No nulls! (except when using standard .NET types)
+						<br/>
+						<q>The type 'Person' does not have 'null' as a proper value</q>
+					</div>
+					<pre class="fragment"><code class="fsharp hljs" data-trim>								
+let PrintPerson person =
+    match person with
+    | Some(p) -> printfn "%A" p
+    | None -> printfn "No person given" 
+
+let NullExample() = 
+    PrintPerson None
+
+let RealExample() =
+    PrintPerson (Some({Name="Bob"; Age=52;}))
+					</code></pre>
+					<div class="fragment">
+						Pretty printing built in
+						<pre class="fragment"><code class="hljs nohighlight" data-trim>								
+{Name = "Bob";
+Age = 52;}
+						</code></pre>
+					</div>
+				
+
+
+
+
+				<section>
+					<h1>Show me the code!</h1>
+					<pre><code class="fsharp hljs" data-trim>					
+let ParseInt value =
+    let success, intValue = Int32.TryParse value
+    if success then Some(intValue) else None
+    				</code></pre>
+    				<pre class="fragment"><code class="fsharp hljs" data-trim>					
+let ReadPerson() = 
+    printf "Enter name: "
+    let name = Console.ReadLine()
+    printf "Enter age: "
+    let ageOption = ParseInt (Console.ReadLine())
+    match ageOption with
+    | Some(age) -> Some({Name=name;Age=age;})
+    | None -> None
+					</code></pre>
+				
+
+
+
+
+				<section>
+					<h1>Show me the code!</h1>
+					<pre><code class="fsharp hljs" data-trim>
+[&ltMeasure&gt] type USD
+[&ltMeasure&gt] type GBP					
+					</code></pre>
+					<pre class="fragment"><code class="fsharp hljs" data-trim>					
+let AddAmounts (x:int&ltUSD&gt) (y:int&ltUSD&gt) = 
+    x + y
+					</code></pre>
+					<pre class="fragment"><code class="fsharp hljs" data-trim>					
+let TestAdder() = 
+    AddAmounts 1&ltUSD&gt 2&ltUSD&gt
+    				</code></pre>
+    				<pre class="fragment"><code class="fsharp hljs" data-trim>					
+let TestAdderInvalid() = 
+    AddAmounts 1&ltUSD&gt 2
+					</code></pre>
+					<pre class="fragment">
+This expression was expected to have type
+<br/>int&ltUSD&gt
+<br/>but here has type
+int</pre>
+					<pre class="fragment"><code class="fsharp hljs" data-trim>					
+let TestAdderInvalid2() = 
+    AddAmounts 1&ltUSD&gt 2&ltGBP&gt
+					</code></pre>
+					<pre class="fragment">
+Type mismatch. Expecting a
+<br/>int&ltUSD&gt
+<br/>but given a
+<br/>int&ltGBP&gt
+<br/>The unit of measure 'USD' does not match the unit of measure 'GBP'</pre>
+					<pre class="fragment"><code class="fsharp hljs" data-trim>					
+let AddAmounts (x:int&lt'a&gt) (y:int&lt'a&gt) = 
+    x + y
+					</pre>
+				
+
+
+
+
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				history: true,
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
