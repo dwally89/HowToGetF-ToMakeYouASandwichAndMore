@@ -49,15 +49,15 @@
 
 				<section>
 					<section>
-					<h1>What are the benefits?</h1>
-					<ul>
-						<li class="fragment">Calling a function twice with the same arguments produces the same result</li>
-						<li class="fragment">Immutability by default</li>
-						<li class="fragment">No null checking</li>
-						<li class="fragment">More concise syntax</li>
-						<li class="fragment">Less boilerplate</li>
-					</ul>
-				</section>
+						<h1>What are the benefits?</h1>
+						<ul>
+							<li class="fragment">Calling a function twice with the same arguments produces the same result</li>
+							<li class="fragment">Immutability by default</li>
+							<li class="fragment">No null checking</li>
+							<li class="fragment">More concise syntax</li>
+							<li class="fragment">Less boilerplate</li>
+						</ul>
+					</section>
 					<section>
 						<h1>Side note:</h1>
 						<h3>Being concise isn't always good!</h3>
@@ -235,21 +235,67 @@ Age = 52;}
 
 				<section>
 					<h1>Show me the code!</h1>
-					<pre><code class="fsharp hljs" data-trim>					
-let ParseInt value =
-    let success, intValue = Int32.TryParse value
-    if success then Some(intValue) else None
-    				</code></pre>
-    				<pre class="fragment"><code class="fsharp hljs" data-trim>					
-let ReadPerson() = 
-    printf "Enter name: "
-    let name = Console.ReadLine()
-    printf "Enter age: "
-    let ageOption = ParseInt (Console.ReadLine())
-    match ageOption with
-    | Some(age) -> Some({Name=name;Age=age;})
-    | None -> None
-					</code></pre>
+					<h2>Union types</h2>
+					<div style="float:left;width:50%;">
+						<pre><code class="fsharp hljs" data-trim>	
+namespace FSharp
+
+open System
+
+module Parser = 
+    let TryParseInt value = 
+        try
+            Some(Int32.Parse value)
+        with
+        | _ -> None
+
+    let ReadInt() = 
+        let line = Console.ReadLine()
+        match TryParseInt line with
+        | Some(i) -> printfn "Successfully read integer: %i" i
+        | None -> printfn "Failed to read integer"
+						</code></pre>						
+					</div>
+					<div style="float:right;width:50%;">
+						<pre><code class="hljs" data-trim>	
+using System;
+
+namespace CSharp
+{
+    public class Parser
+    {
+        public static bool TryParseInt(string value, out int i)
+        {
+            i = 0;
+
+            try
+            {
+                i = int.Parse(value);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public static void ReadInt()
+        {
+            var line = Console.ReadLine();
+            int i;
+            if (TryParseInt(line, out i))
+            {
+                Console.WriteLine($"Successfully read integer: {i}");
+            }
+            else
+            {
+                Console.WriteLine("Failed to read integer");
+            }
+        }
+    }
+}
+						</code></pre>						
+					</div>
 				</section>
 
 
@@ -257,6 +303,7 @@ let ReadPerson() =
 
 				<section>
 					<h1>Show me the code!</h1>
+					<h2>Units of measure</h2>
 					<pre><code class="fsharp hljs" data-trim>
 [&ltMeasure&gt] type USD
 [&ltMeasure&gt] type GBP					
@@ -373,6 +420,11 @@ let PrintAllUsers() =
 					Type providers also exist for CSV, HTML, XML and WorldBank
 					</div>
 				</section>
+
+
+
+
+				<section>
 					<h1>Useful links</h1>
 					<ul>
 					<li><a href="https://fsharpforfunandprofit.com/">F# for fun and profit</a></li>
