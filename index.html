@@ -179,6 +179,53 @@ let main argv =
 
 
 
+<section>
+					<h1>Show me the code!</h1>
+					<h2>Type inference</h2>
+					<div style="float:left;width:50%;">
+						<pre><code class="fsharp hljs" data-trim>	
+namespace Parser
+
+open System
+
+module CommandLineParser = 
+    let GetArgument prompt parser = 
+        printf "%s" prompt
+        Console.ReadLine() |> parser
+
+    let GetInteger() = 
+        GetArgument "Enter an integer: " Int32.Parse
+						</code></pre>						
+					</div>
+					<div style="float:right;width:50%;">
+						<pre><code class="hljs" data-trim>	
+using System;
+
+namespace Parser
+{
+    public class CommandLineParser
+    {
+        public static T GetArgument&ltT&gt(string prompt, Func&ltstring, T&gt parser)
+        {
+            Console.Write(prompt);
+            return parser(Console.ReadLine());
+        }
+
+        public static int GetInteger()
+        {
+            return GetArgument("Enter an integer: ", int.Parse);
+        }
+    }
+}
+						</code></pre>						
+					</div>
+				</section>
+
+
+
+
+
+
 
 				<section>
 					<h1>Show me the code!</h1>
@@ -380,49 +427,7 @@ let AddAmounts (x:int&lt'a&gt) (y:int&lt'a&gt) =
 
 
 
-
-				<section>
-					<h1>Show me the code!</h1>
-					<h2>Type inference</h2>
-					<div style="float:left;width:50%;">
-						<pre><code class="fsharp hljs" data-trim>	
-namespace Parser
-
-open System
-
-module CommandLineParser = 
-    let GetArgument prompt parser = 
-        printf "%s" prompt
-        Console.ReadLine() |> parser
-
-    let GetInteger() = 
-        GetArgument "Enter an integer: " Int32.Parse
-						</code></pre>						
-					</div>
-					<div style="float:right;width:50%;">
-						<pre><code class="hljs" data-trim>	
-using System;
-
-namespace Parser
-{
-    public class CommandLineParser
-    {
-        public static T GetArgument&ltT&gt(string prompt, Func&ltstring, T&gt parser)
-        {
-            Console.Write(prompt);
-            return parser(Console.ReadLine());
-        }
-
-        public static int GetInteger()
-        {
-            return GetArgument("Enter an integer: ", int.Parse);
-        }
-    }
-}
-						</code></pre>						
-					</div>
-				</section>
-
+				
 
 
 
@@ -480,6 +485,8 @@ let PrintAllUsers() =
 			Reveal.initialize({
 				height:"100%",
 				width:"75%",				
+				//height:"1080",
+				//width:"1920",				
 				history: true,
 
 				// More info https://github.com/hakimel/reveal.js#dependencies
