@@ -301,6 +301,42 @@ namespace CSharp
 
 
 
+				<section>
+					<h1>Show me the code!</h1>
+					<h2>Union types</h2>
+					<div class="fragment">
+						<pre><code class="fsharp hljs" data-trim>	
+type Shape =
+| Line of int
+| Square of int:width * int:height
+| Triangle of int * int * int
+| Cube of int * int * int
+						</code></pre>						
+					</div>					
+					<div class="fragment">
+						<pre><code class="fsharp hljs" data-trim>	
+let line = Line(5)
+let square = Square(2,7)
+						</code></pre>
+					</div>
+					<div class="fragment">
+						<pre><code class="fsharp hljs" data-trim>	
+let PrintShape shape = 
+    match shape with
+    | Line(length) -> sprintf "This is a line of length %i" length
+    | Square(width, height) -> sprintf "This is a square of dimensions %i,%i" width height
+						</code></pre>							
+					</div>
+					<div class="fragment">
+						<pre><code class="fsharp hljs" data-trim>	
+Incomplete pattern matches on this expression. 
+For example, the value 'Cube (_, _, _)' may indicate a case not covered by the pattern(s).					
+						</code></pre>
+					</div>
+				</section>
+
+
+
 
 				<section>
 					<h1>Show me the code!</h1>
