@@ -48,31 +48,31 @@
 
 
 				<section>
-						<h1>What are the benefits?</h1>
-						<ul>
-							<li class="fragment">Calling a function twice with the same arguments produces the same result</li>
-							<li class="fragment">Immutability by default</li>
-							<li class="fragment">No null checking</li>
-							<li class="fragment">More concise syntax</li>
-							<li class="fragment">Less boilerplate</li>
-						</ul>
-					</section>
+					<h1>What are the benefits?</h1>
+					<ul>
+						<li class="fragment">Calling a function twice with the same arguments produces the same result</li>
+						<li class="fragment">Immutability by default</li>
+						<li class="fragment">No null checking</li>
+						<li class="fragment">More concise syntax</li>
+						<li class="fragment">Less boilerplate</li>
+					</ul>
+				</section>
 
 
 
-					<section>
-						<h1>Side note:</h1>
-						<h3>Being concise isn't always good!</h3>
-						<div class="fragment">
-							What does this APL code do?!?
-							<pre>
+				<section>
+					<h1>Side note:</h1>
+					<h3>Being concise isn't always good!</h3>
+					<div class="fragment">
+						What does this APL code do?!?
+						<pre>
 (~R∊R∘.×R)/R←1↓ιR
-							</pre>
-						</div>
-						<div class="fragment">
-							Answer: Finds all prime numbers from 1 to R
-						</div>
-					</section>
+						</pre>
+					</div>
+					<div class="fragment">
+						Answer: Finds all prime numbers from 1 to R
+					</div>
+				</section>
 
 
 
@@ -91,14 +91,20 @@
 
 
 
+
+
 				<section>
 					<h1>Show me the code!</h1>
+				</section>
+
+
+
+
+
+				<section>
 					<div style="float:left;width:50%;">
 						<pre><code class="fsharp hljs" data-trim>					
-[&ltEntryPoint&gt]
-let main argv =
-    printfn "Hello, World!"
-    0
+printfn "Hello, World!"
 						</code></pre>
 						<div class="fragment">
 							<pre><code class="fsharp hljs" data-trim>
@@ -149,10 +155,7 @@ public class Person
 
 
 				<section>
-					<h1>Show me the code!</h1>
 					<pre><code class="fsharp hljs" data-trim>					
-open System
-
 type Person = {Name:string; Age:int;}
 
 let MakePerson name =
@@ -161,30 +164,23 @@ let MakePerson name =
 // Create new person by just modifying the age
 let GrowOlder person = 
     {person with Age=person.Age+1}
+        
+printfn "Hello, World!"
+let person1 = {Name="Bob";Age=52;}
+let person2 = {Name="Bob";Age=52;}
 
-[&ltEntryPoint&gt]
-let main argv =        
-    printfn "Hello, World!"
-    let person1 = {Name="Bob";Age=52;}
-    let person2 = {Name="Bob";Age=52;}
-
-    // Print to console in a type-safe way
-    printfn "%i" (person1.GetHashCode())
-    printfn "%i" (person2.GetHashCode())
-    printfn "%b" (person1=person2)        
-    
-    Console.ReadKey() |> ignore
-    0
+// Print to console in a type-safe way
+printfn "%i" (person1.GetHashCode())
+printfn "%i" (person2.GetHashCode())
+printfn "%b" (person1=person2)        
 					</code></pre>
 				</section>
 
 
 
-<section>
-					<h1>Show me the code!</h1>
+				<section>
 					<h2>Type inference</h2>
-					<div style="float:left;width:50%;">
-						<pre><code class="fsharp hljs" data-trim>	
+					<pre><code class="fsharp hljs" data-trim>	
 namespace Parser
 
 open System
@@ -196,10 +192,16 @@ module CommandLineParser =
 
     let GetInteger() = 
         GetArgument "Enter an integer: " Int32.Parse
-						</code></pre>						
-					</div>
-					<div style="float:right;width:50%;">
-						<pre><code class="hljs" data-trim>	
+					</code></pre>
+				</section>
+
+
+
+
+
+				<section>	
+					<h2>Type inference</h2>	
+					<pre><code class="hljs" data-trim>	
 using System;
 
 namespace Parser
@@ -218,8 +220,7 @@ namespace Parser
         }
     }
 }
-						</code></pre>						
-					</div>
+					</code></pre>						
 				</section>
 
 
@@ -229,7 +230,6 @@ namespace Parser
 
 
 				<section>
-					<h1>Show me the code!</h1>
 					Tony Hoare (inventor of the null reference): 
 					<blockquote>“I call it my billion-dollar mistake.
 					<br/>…
@@ -241,7 +241,6 @@ namespace Parser
 
 				
 				<section>
-					<h1>Show me the code!</h1>
 					<pre><code class="fsharp hljs" data-trim>								
 let PrintPerson person = 
     printfn "Name:%s, Age:%i" person.Name person.Age
@@ -258,7 +257,13 @@ let RealExample() =
 The type 'Person' does not have 'null' as a proper value
 						</pre>
 					</div>
-					<pre class="fragment"><code class="fsharp hljs" data-trim>								
+				</section>
+
+
+
+
+				<section>
+					<pre><code class="fsharp hljs" data-trim>								
 let PrintPerson person =
     match person with
     | Some(p) -> printfn "%A" p
@@ -283,10 +288,8 @@ Age = 52;}
 
 
 				<section>
-					<h1>Show me the code!</h1>
 					<h2>Union types</h2>
-					<div style="float:left;width:50%;">
-						<pre><code class="fsharp hljs" data-trim>	
+					<pre><code class="fsharp hljs" data-trim>	
 namespace FSharp
 
 open System
@@ -303,10 +306,15 @@ module Parser =
         match TryParseInt line with
         | Some(i) -> printfn "Successfully read integer: %i" i
         | None -> printfn "Failed to read integer"
-						</code></pre>						
-					</div>
-					<div style="float:right;width:50%;">
-						<pre><code class="hljs" data-trim>	
+					</code></pre>
+				</section>
+
+
+
+
+
+				<section>					
+					<pre class="smallCode"><code class="hljs" data-trim>	
 using System;
 
 namespace CSharp
@@ -343,14 +351,12 @@ namespace CSharp
         }
     }
 }
-						</code></pre>						
-					</div>
+					</code></pre>						
 				</section>
 
 
 
 				<section>
-					<h1>Show me the code!</h1>
 					<h2>Union types</h2>
 					<div class="fragment">
 						<pre><code class="fsharp hljs" data-trim>	
@@ -371,14 +377,17 @@ let square = Square(2,7)
 						<pre><code class="fsharp hljs" data-trim>	
 let PrintShape shape = 
     match shape with
-    | Line(length) -> sprintf "This is a line of length %i" length
-    | Square(width, height) -> sprintf "This is a square of dimensions %i,%i" width height
+    | Line(length) -> 
+        sprintf "This is a line of length %i" length
+    | Square(width, height) -> 
+        sprintf "This is a square of dimensions %i,%i" width height
 						</code></pre>							
 					</div>
 					<div class="fragment">
 						<pre><code class="fsharp hljs" data-trim>	
 Incomplete pattern matches on this expression. 
-For example, the value 'Cube (_, _, _)' may indicate a case not covered by the pattern(s).					
+For example, the value 'Cube (_, _, _)' 
+may indicate a case not covered by the pattern(s).					
 						</code></pre>
 					</div>
 				</section>
@@ -387,7 +396,6 @@ For example, the value 'Cube (_, _, _)' may indicate a case not covered by the p
 
 
 				<section>
-					<h1>Show me the code!</h1>
 					<h2>Units of measure</h2>
 					<pre><code class="fsharp hljs" data-trim>
 [&ltMeasure&gt] type USD
@@ -410,7 +418,14 @@ This expression was expected to have type
 <br/>int&ltUSD&gt
 <br/>but here has type
 int</pre>
-					<pre class="fragment"><code class="fsharp hljs" data-trim>					
+				</section>
+
+
+
+
+
+				<section>
+					<pre><code class="fsharp hljs" data-trim>					
 let TestAdderInvalid2() = 
     AddAmounts 1&ltUSD&gt 2&ltGBP&gt
 					</code></pre>
@@ -433,7 +448,6 @@ let AddAmounts (x:int&lt'a&gt) (y:int&lt'a&gt) =
 
 
 				<section>
-					<h1>Show me the code!</h1>
 					<h2>Type Providers</h2>
 					Infer the structure of a sample document and provide type-safe access
 					<pre class="fragment"><code class="fsharp hljs" data-trim>	
@@ -447,7 +461,14 @@ let thomas = Person.Parse """ { "name":"Thomas", "age":14 } """
 printfn "%s" thomas.Name
 printfn "%i" thomas.Age      
 					</code></pre>
-					<pre class="fragment"><code class="fsharp hljs" data-trim>	
+				</section>
+
+
+
+
+
+				<section>
+					<pre><code class="fsharp hljs" data-trim>	
 open FSharp.Data
 
 type EntitlementUser = JsonProvider<""" [{"aqrUserId":"wallisd","userName":"Daniel Wallis","altName":"Daniel Wallis","department":"IT","group":"Enterprise Dev","hR_Id":56368,"aqrTitle":"Analyst","isManager":false,"manager":"Vitaliy Razhanskiy","managerId":"razhanskiyv","hireDate":"2016-04-11T00:00:00","employeeType":"Employee","adpGroupNumber":"71","email":"Daniel.Wallis@aqr.com","degree":null,"firstName":"Daniel","lastName":"Wallis"}] """>    
@@ -484,10 +505,10 @@ let PrintAllUsers() =
 		<script>
 			// More info https://github.com/hakimel/reveal.js#configuration
 			Reveal.initialize({
-				height:"100%",
-				width:"75%",				
-				//height:"1080",
-				//width:"1920",				
+				//height:"100%",
+				//width:"75%",				
+				height:"1080",
+				width:"1920",				
 				history: true,
 
 				// More info https://github.com/hakimel/reveal.js#dependencies
