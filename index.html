@@ -117,7 +117,7 @@ let MakePerson name =
 						</div>				
 					</div>
 					<div style="float:right;width:50%;">
-						<pre class="fragment"><code class="hljs" data-trim>	
+						<pre class="fragment smallCode"><code class="hljs" data-trim>	
 public class Person
 {
     public Person(string name, int age)
@@ -484,6 +484,430 @@ let PrintAllUsers() =
 					Type providers also exist for CSV, HTML, XML and WorldBank
 					</div>
 				</section>
+
+
+
+
+
+				<section>
+				<h2>One last thing...</h2>
+				<div style="float:left;width:50%;">
+					<pre style="font-size: 0.05em"><code class="fsharp hljs" data-trim>
+namespace Mastermind
+
+open System
+
+type Result&lt'a,'b&gt = 
+    |ValidGuess of 'a
+    |InvalidGuess of 'b
+
+type MatchResult = 
+    |Correct
+    |InWrongPlace
+    |Incorrect
+
+module CodeComparer =    
+    let updateMatchedItems i = 
+        Seq.mapi (fun idx existingItem -&gt if idx = i then true else existingItem)
+
+    let findItemInWrongPlace item matchedItems = 
+        Seq.mapi (fun cidx citem -&gt cidx, citem)
+        &gt&gt Seq.filter (fun (cidx, citem) -&gt (not &lt| Seq.item cidx matchedItems) && citem = item)
+        &gt&gt Seq.map fst
+        &gt&gt Seq.tryHead
+
+    let compareOne code acc pair = 
+        let existingResults, matchedItems = acc
+        let i, item = pair
+        let result, newMatchedItems = 
+                    if item = Seq.item i code then
+                        Correct, (matchedItems |&gt updateMatchedItems i)
+                    else
+                        match code |&gt findItemInWrongPlace item matchedItems with
+                        |Some(matchedI) -&gt InWrongPlace, (matchedItems |&gt updateMatchedItems matchedI)
+                        |None -&gt Incorrect, matchedItems                     
+        
+        (List.append existingResults [result]), newMatchedItems
+
+    let getAllInCorrectPlace guess code = 
+        guess |&gt Seq.mapi (fun idx item -&gt Seq.item idx code = item)
+
+    let compare guess code = 
+        let codeLength = Seq.length code
+        if Seq.length guess &lt&gt codeLength then
+            InvalidGuess(sprintf "Incorrect guess length. Expected length: %i" codeLength)
+        else
+            let matchedItems = getAllInCorrectPlace guess code
+            guess 
+            |&gt Seq.mapi (fun i item -&gt i, item)
+            |&gt Seq.fold (compareOne code) ([], matchedItems)
+            |&gt fst
+            |&gt ValidGuess
+
+    let compareAndPrintResult guess code = 
+        match compare guess code with
+        |ValidGuess(result) -&gt printfn "%A , %A = %A" guess code result
+        |InvalidGuess(f) -&gt printfn "%A , %A = %s" guess code f
+
+module Game = 
+    let compareResults result1 result2 = 
+        match result1 with
+        | ValidGuess(m) -&gt
+            let length = m |&gt Seq.length
+            [0..length-1]
+            |&gt Seq.forall (fun i -&gt Seq.item i m = Seq.item i result2)
+        | InvalidGuess(e) -&gt false
+
+    let rec start code remainingGuesses = 
+        let guess = remainingGuesses |&gt Seq.head
+        let result = CodeComparer.compare guess code
+        match result with
+        | ValidGuess(m) -&gt 
+            if m |&gt Seq.forall (fun r -&gt match r with 
+                                         |Correct -&gt true
+                                         | _ -&gt false) then
+                guess
+            else
+                remainingGuesses
+                |&gt Seq.skip 1
+                |&gt Seq.filter (fun g -&gt let r = (CodeComparer.compare g guess)
+                                        compareResults r m)
+                |&gt start code
+        | InvalidGuess(e) -&gt invalidOp e
+
+    let rec generateGuesses length (options:list&lt'a&gt) (existingGuesses:list&ltlist&lt'a&gt&gt) = 
+        if length = 0 then
+            existingGuesses
+        else
+            options
+            |&gt List.collect (fun o -&gt if Seq.isEmpty existingGuesses then
+                                          [[o]]
+                                      else
+                                          existingGuesses |&gt List.map (fun g -&gt List.append [o] g))
+            |&gt generateGuesses (length-1) options
+
+    let playGame() = 
+        let options = [1..6]        
+        let length = 4
+        let random = new Random()
+        let code = [1..length] |&gt List.map (fun i -&gt Seq.item (random.Next(Seq.length options)) options)        
+        printfn "%A" code
+        let allGuesses = generateGuesses length options []
+        printfn "%A" allGuesses
+        start code allGuesses        
+					</code></pre>
+					</div>
+					<div style="float:right;width:50%;">
+					<pre style="font-size: 0.05em"><code class="hljs" data-trim>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace MastermindCSharp
+{
+    internal abstract class Result
+    {
+        public abstract T AcceptVisitor&ltT&gt(IResultVisitor&ltT&gt resultVisitor);
+    }
+
+    internal class ValidGuess : Result
+    {
+        private readonly List&ltMatchResult&gt result;
+
+        public ValidGuess(List&ltMatchResult&gt result)
+        {
+            this.result = result;
+        }
+
+        public List&ltMatchResult&gt Result =&gt result;
+
+        public override T AcceptVisitor&ltT&gt(IResultVisitor&ltT&gt resultVisitor)
+        {
+            return resultVisitor.VisitValidGuess(this);
+        }
+    }
+
+    internal class InvalidGuess : Result
+    {
+        private readonly string message;
+
+        public InvalidGuess(string message)
+        {
+            this.message = message;
+        }
+
+        public string Message =&gt message;
+
+        public override T AcceptVisitor&ltT&gt(IResultVisitor&ltT&gt resultVisitor)
+        {
+            return resultVisitor.VisitInvalidGuess(this);
+        }
+    }
+
+    internal enum MatchResult
+    {
+        Correct,
+        InWrongPlace,
+        Incorrect
+    }
+
+    public class CodeComparer
+    {
+        internal static IEnumerable&ltbool&gt UpdateMatchedItems(int i, IEnumerable&ltbool&gt existingItems)
+        {
+            return existingItems.Select((existingItem, idx) =&gt idx == i || existingItem);
+        }
+
+        private static Option&ltint&gt FindItemInWrongPlace&ltT&gt(T item, IEnumerable&ltbool&gt matchedItems, IEnumerable&ltT&gt items)
+        {
+            var result = items
+                .Select((citem, cindex) =&gt Tuple.Create(cindex, citem))
+                .Where(tuple =&gt !matchedItems.ElementAt(tuple.Item1) && Equals(tuple.Item2, item))
+                .Select(tuple =&gt tuple.Item1);
+            return result.Any() ? (Option&ltint&gt)new Some&ltint&gt(result.First()) : new None&ltint&gt();
+        }
+
+        private static Tuple&ltList&ltMatchResult&gt, IEnumerable&ltbool&gt&gt CompareOne&ltT&gt(IEnumerable&ltT&gt code, Tuple&ltList&ltMatchResult&gt, IEnumerable&ltbool&gt&gt acc, Tuple&ltint, T&gt pair)
+        {
+            var existingResults = acc.Item1;
+            var matchedItems = acc.Item2;
+            var i = pair.Item1;
+            var item = pair.Item2;
+            var tuple = Equals(item, code.ElementAt(i))
+                ? Tuple.Create(MatchResult.Correct, UpdateMatchedItems(i, matchedItems))
+                : FindItemInWrongPlace(item, matchedItems, code)
+                    .AcceptVisitor(new CompareOneVisitor(matchedItems));
+
+            return Tuple.Create(existingResults.Concat(new List&ltMatchResult&gt {tuple.Item1}).ToList(), tuple.Item2);
+        }
+
+        private static IEnumerable&ltbool&gt GetAllInCorrectPlace&ltT&gt(IEnumerable&ltT&gt guess, IEnumerable&ltT&gt code)
+        {
+            return guess.Select((item, idx) =&gt Equals(code.ElementAt(idx), item));
+        }
+
+        internal static Result Compare&ltT&gt(IEnumerable&ltT&gt guess, IEnumerable&ltT&gt code)
+        {
+            var codeLength = code.Count();
+            if (guess.Count() != codeLength)
+            {
+                return new InvalidGuess($"Incorrect guess length. Expected length: {codeLength}");
+            }
+
+            var matchedItems = GetAllInCorrectPlace(guess, code);
+            return new ValidGuess(guess
+                .Select((item, i) =&gt Tuple.Create(i, item))
+                .Aggregate(Tuple.Create(new List&ltMatchResult&gt(), matchedItems),
+                    (acc, pair) =&gt CompareOne(code, acc, pair))
+                .Item1);
+        }
+
+        private void CompareAndPrintResult&ltT&gt(IEnumerable&ltT&gt guess, IEnumerable&ltT&gt code)
+        {
+            var result = Compare(guess, code);
+            result.AcceptVisitor(new PrintResultVisitor&ltT&gt(guess, code));
+        }
+    }
+
+    internal class CompareOneVisitor : IOptionVisitor&ltTuple&ltMatchResult, IEnumerable&ltbool&gt&gt, int&gt
+    {
+        private readonly IEnumerable&ltbool&gt matchedItems;
+
+        public CompareOneVisitor(IEnumerable&ltbool&gt matchedItems)
+        {
+            this.matchedItems = matchedItems;
+        }
+
+        public Tuple&ltMatchResult, IEnumerable&ltbool&gt&gt VisitSome(Some&ltint&gt some)
+        {
+            return Tuple.Create(MatchResult.InWrongPlace, CodeComparer.UpdateMatchedItems(some.Value, matchedItems));
+        }
+
+        public Tuple&ltMatchResult, IEnumerable&ltbool&gt&gt VisitNone(None&ltint&gt none)
+        {
+            return Tuple.Create(MatchResult.Incorrect, matchedItems);
+        }
+    }
+
+    internal class Game
+    {
+        internal static bool CompareResults&ltT&gt(IEnumerable&ltT&gt result2, Result result1)
+        {
+            return result1.AcceptVisitor(new CompareResultsVisitor&ltT&gt(result2));
+        }
+
+        internal static IEnumerable&ltT&gt Start&ltT&gt(IEnumerable&ltT&gt code, IEnumerable&ltIEnumerable&ltT&gt&gt remainingGuesses)
+        {
+            var guess = remainingGuesses.First();
+            Console.WriteLine($"Guess: {Utils.ConvertIEnumerableToString(guess)}");
+            var result = CodeComparer.Compare(guess, code);
+            return result.AcceptVisitor(new StartVisitor&ltT&gt(remainingGuesses, guess, code));
+        }
+
+        private static List&ltList&ltT&gt&gt GenerateGuesses&ltT&gt(int length, IEnumerable&ltT&gt options, List&ltList&ltT&gt&gt existingGuesses)
+        {
+            return length == 0
+                ? existingGuesses
+                : GenerateGuesses(length - 1, options, options
+                    .SelectMany(o =&gt
+                    {
+                        return !existingGuesses.Any()
+                            ? new List&ltList&ltT&gt&gt {new List&ltT&gt {o}}
+                            : existingGuesses.Select(g =&gt new List&ltT&gt {o}.Concat(g).ToList());
+                    }).ToList());
+        }
+
+        internal static void PlayGame()
+        {
+            var options = Enumerable.Range(1, 6).ToList();
+            const int length = 4;
+            var random = new Random();
+            var code = Enumerable.Range(1, length).Select(i =&gt options.ElementAt(random.Next(options.Count))).ToList();
+            Console.WriteLine(Utils.ConvertIEnumerableToString(code));
+            var allGuesses = GenerateGuesses(length, options, new List&ltList&ltint&gt&gt());
+            Console.WriteLine(Utils.ConvertIEnumerableOfIEnumerablesToString(allGuesses));
+            Start(code, allGuesses);
+        }
+    }
+
+    internal class StartVisitor&ltT&gt : IResultVisitor&ltIEnumerable&ltT&gt&gt
+    {
+        private readonly IEnumerable&ltIEnumerable&ltT&gt&gt remainingGuesses;
+        private readonly IEnumerable&ltT&gt guess;
+        private readonly IEnumerable&ltT&gt code;
+
+        public StartVisitor(IEnumerable&ltIEnumerable&ltT&gt&gt remainingGuesses, IEnumerable&ltT&gt guess, IEnumerable&ltT&gt code)
+        {
+            this.remainingGuesses = remainingGuesses;
+            this.guess = guess;
+            this.code = code;
+        }
+
+        public IEnumerable&ltT&gt VisitValidGuess(ValidGuess validGuess)
+        {
+            var m = validGuess.Result;
+            return m.All(r =&gt r == MatchResult.Correct)
+                ? guess
+                : Game.Start(code, remainingGuesses
+                    .Skip(1)
+                    .Where(g =&gt
+                    {
+                        var r = CodeComparer.Compare(g, guess);
+                        return Game.CompareResults(m, r);
+                    }));
+        }
+
+        public IEnumerable&ltT&gt VisitInvalidGuess(InvalidGuess invalidGuess)
+        {
+            throw new InvalidOperationException(invalidGuess.Message);
+        }
+    }
+
+    internal class CompareResultsVisitor&ltT&gt : IResultVisitor&ltbool&gt
+    {
+        private readonly IEnumerable&ltT&gt result2;
+
+        public CompareResultsVisitor(IEnumerable&ltT&gt result2)
+        {
+            this.result2 = result2;
+        }
+
+        public bool VisitValidGuess(ValidGuess validGuess)
+        {
+            var m = validGuess.Result;
+            var length = m.Count;
+            return Enumerable.Range(0, length).All(i =&gt Equals(m.ElementAt(i), result2.ElementAt(i)));
+        }
+
+        public bool VisitInvalidGuess(InvalidGuess invalidGuess)
+        {
+            return false;
+        }
+    }
+
+    internal class PrintResultVisitor&ltT&gt : IResultVisitor&ltobject&gt
+    {
+        private readonly IEnumerable&ltT&gt guess;
+        private readonly IEnumerable&ltT&gt code;
+
+        public PrintResultVisitor(IEnumerable&ltT&gt guess, IEnumerable&ltT&gt code)
+        {
+            this.guess = guess;
+            this.code = code;
+        }
+
+        public object VisitValidGuess(ValidGuess validGuess)
+        {
+            Console.WriteLine($"{Utils.ConvertIEnumerableToString(guess)}, {Utils.ConvertIEnumerableToString(code)}, {Utils.ConvertIEnumerableToString(validGuess.Result)}");
+            return null;
+        }
+
+        public object VisitInvalidGuess(InvalidGuess invalidGuess)
+        {
+            Console.WriteLine($"{Utils.ConvertIEnumerableToString(guess)}, {Utils.ConvertIEnumerableToString(code)}, {Utils.ConvertIEnumerableToString(invalidGuess.Message)}");
+            return null;
+        }
+    }
+
+    internal interface IResultVisitor&ltT&gt 
+    {
+        T VisitValidGuess(ValidGuess validGuess);
+        T VisitInvalidGuess(InvalidGuess invalidGuess);
+    }
+
+    internal abstract class Option&ltT&gt
+    {
+        public abstract TResult AcceptVisitor&ltTResult&gt(IOptionVisitor&ltTResult, T&gt visitor);
+    }
+
+    internal interface IOptionVisitor&ltT, TOption&gt
+    {
+        T VisitSome(Some&ltTOption&gt some);
+        T VisitNone(None&ltTOption&gt none);
+    }
+
+    internal class Some&ltT&gt : Option&ltT&gt
+    {
+        private readonly T value;
+
+        public Some(T value)
+        {
+            this.value = value;
+        }
+        
+        public T Value =&gt value;
+        public override TResult AcceptVisitor&ltTResult&gt(IOptionVisitor&ltTResult, T&gt visitor)
+        {
+            return visitor.VisitSome(this);
+        }
+    }
+
+    internal class None&ltT&gt : Option&ltT&gt
+    {
+        public override TResult AcceptVisitor&ltTResult&gt(IOptionVisitor&ltTResult, T&gt visitor)
+        {
+            return visitor.VisitNone(this);
+        }
+    }
+
+    internal class Utils
+    {
+        internal static string ConvertIEnumerableToString&ltT&gt(IEnumerable&ltT&gt code)
+        {
+            return $"[{string.Join(",", code)}]";
+        }
+
+        internal static string ConvertIEnumerableOfIEnumerablesToString&ltT&gt(IEnumerable&ltIEnumerable&ltT&gt&gt allGuesses)
+        {
+            return string.Join("\n", allGuesses.Select(ConvertIEnumerableToString));
+        }
+    }
+}
+					</code></pre>
+					</div>
+				</section>
+
+
 
 
 
