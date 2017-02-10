@@ -605,12 +605,42 @@ using System.Linq;
 
 namespace MastermindCSharp
 {
-    internal abstract class Result
+    internal class Some&ltT&gt : Option&ltT&gt
     {
-        public abstract T AcceptVisitor&ltT&gt(IResultVisitor&ltT&gt resultVisitor);
+        private readonly T value;
+
+        public Some(T value)
+        {
+            this.value = value;
+        }
+
+        public T Value =&gt value;
+
+        public override TResult AcceptVisitor&ltTResult&gt(Func&ltSome&ltT&gt, TResult&gt someVisitor, Func&ltNone&ltT&gt, TResult&gt noneVisitor)
+        {
+            return someVisitor(this);
+        }
     }
 
-    internal class ValidGuess : Result
+    internal class None&ltT&gt : Option&ltT&gt
+    {
+        public override TResult AcceptVisitor&ltTResult&gt(Func&ltSome&ltT&gt, TResult&gt someVisitor, Func&ltNone&ltT&gt, TResult&gt noneVisitor)
+        {
+            return noneVisitor(this);
+        }
+    }
+
+    internal abstract class Option&ltT&gt
+    {
+        public abstract TResult AcceptVisitor&ltTResult&gt(Func&ltSome&ltT&gt, TResult&gt someVisitor, Func&ltNone&ltT&gt, TResult&gt noneVisitor);
+    }
+
+    internal abstract class Result&ltTSuccess, TFailure&gt
+    {
+        public abstract TResult AcceptVisitor&ltTResult&gt(Func&ltTSuccess, TResult&gt successVisitor, Func&ltTFailure, TResult&gt failureVisitor);
+    }
+
+    internal class ValidGuess : Result&ltValidGuess, InvalidGuess&gt
     {
         private readonly List&ltMatchResult&gt result;
 
@@ -621,13 +651,13 @@ namespace MastermindCSharp
 
         public List&ltMatchResult&gt Result =&gt result;
 
-        public override T AcceptVisitor&ltT&gt(IResultVisitor&ltT&gt resultVisitor)
+        public override TResult AcceptVisitor&ltTResult&gt(Func&ltValidGuess, TResult&gt successVisitor, Func&ltInvalidGuess, TResult&gt failureVisitor)
         {
-            return resultVisitor.VisitValidGuess(this);
+            return successVisitor(this);
         }
     }
 
-    internal class InvalidGuess : Result
+    internal class InvalidGuess : Result&ltValidGuess, InvalidGuess&gt
     {
         private readonly string message;
 
@@ -638,9 +668,9 @@ namespace MastermindCSharp
 
         public string Message =&gt message;
 
-        public override T AcceptVisitor&ltT&gt(IResultVisitor&ltT&gt resultVisitor)
+        public override TResult AcceptVisitor&ltTResult&gt(Func&ltValidGuess, TResult&gt successVisitor, Func&ltInvalidGuess, TResult&gt failureVisitor)
         {
-            return resultVisitor.VisitInvalidGuess(this);
+            return failureVisitor(this);
         }
     }
 
@@ -676,7 +706,9 @@ namespace MastermindCSharp
             var tuple = Equals(item, code.ElementAt(i))
                 ? Tuple.Create(MatchResult.Correct, UpdateMatchedItems(i, matchedItems))
                 : FindItemInWrongPlace(item, matchedItems, code)
-                    .AcceptVisitor(new CompareOneVisitor(matchedItems));
+                    .AcceptVisitor(
+                    some =&gt Tuple.Create(MatchResult.InWrongPlace, UpdateMatchedItems(some.Value, matchedItems)),
+                    none =&gt Tuple.Create(MatchResult.Incorrect, matchedItems));
 
             return Tuple.Create(existingResults.Concat(new List&ltMatchResult&gt {tuple.Item1}).ToList(), tuple.Item2);
         }
@@ -686,7 +718,7 @@ namespace MastermindCSharp
             return guess.Select((item, idx) =&gt Equals(code.ElementAt(idx), item));
         }
 
-        internal static Result Compare&ltT&gt(IEnumerable&ltT&gt guess, IEnumerable&ltT&gt code)
+        internal static Result&ltValidGuess, InvalidGuess&gt Compare&ltT&gt(IEnumerable&ltT&gt guess, IEnumerable&ltT&gt code)
         {
             var codeLength = code.Count();
             if (guess.Count() != codeLength)
@@ -705,35 +737,33 @@ namespace MastermindCSharp
         private void CompareAndPrintResult&ltT&gt(IEnumerable&ltT&gt guess, IEnumerable&ltT&gt code)
         {
             var result = Compare(guess, code);
-            result.AcceptVisitor(new PrintResultVisitor&ltT&gt(guess, code));
-        }
-    }
-
-    internal class CompareOneVisitor : IOptionVisitor&ltTuple&ltMatchResult, IEnumerable&ltbool&gt&gt, int&gt
-    {
-        private readonly IEnumerable&ltbool&gt matchedItems;
-
-        public CompareOneVisitor(IEnumerable&ltbool&gt matchedItems)
-        {
-            this.matchedItems = matchedItems;
-        }
-
-        public Tuple&ltMatchResult, IEnumerable&ltbool&gt&gt VisitSome(Some&ltint&gt some)
-        {
-            return Tuple.Create(MatchResult.InWrongPlace, CodeComparer.UpdateMatchedItems(some.Value, matchedItems));
-        }
-
-        public Tuple&ltMatchResult, IEnumerable&ltbool&gt&gt VisitNone(None&ltint&gt none)
-        {
-            return Tuple.Create(MatchResult.Incorrect, matchedItems);
+            result.AcceptVisitor&ltobject&gt(
+                validGuess =&gt
+                {
+                    Console.WriteLine(
+                        $"{Utils.ConvertIEnumerableToString(guess)}, {Utils.ConvertIEnumerableToString(code)}, {Utils.ConvertIEnumerableToString(validGuess.Result)}");
+                    return null;
+                },
+                invalidGuess =&gt
+                {
+                    Console.WriteLine(
+                        $"{Utils.ConvertIEnumerableToString(guess)}, {Utils.ConvertIEnumerableToString(code)}, {Utils.ConvertIEnumerableToString(invalidGuess.Message)}");
+                    return null;
+                });
         }
     }
 
     internal class Game
     {
-        internal static bool CompareResults&ltT&gt(IEnumerable&ltT&gt result2, Result result1)
+        internal static bool CompareResults&ltT&gt(IEnumerable&ltT&gt result2, Result&ltValidGuess, InvalidGuess&gt result1)
         {
-            return result1.AcceptVisitor(new CompareResultsVisitor&ltT&gt(result2));
+            return result1.AcceptVisitor(
+                validGuess =&gt {
+                    var m = validGuess.Result;
+                    var length = m.Count;
+                    return Enumerable.Range(0, length).All(i =&gt Equals(m.ElementAt(i), result2.ElementAt(i)));
+                },
+                invalidGuess =&gt false);
         }
 
         internal static IEnumerable&ltT&gt Start&ltT&gt(IEnumerable&ltT&gt code, IEnumerable&ltIEnumerable&ltT&gt&gt remainingGuesses)
@@ -741,7 +771,20 @@ namespace MastermindCSharp
             var guess = remainingGuesses.First();
             Console.WriteLine($"Guess: {Utils.ConvertIEnumerableToString(guess)}");
             var result = CodeComparer.Compare(guess, code);
-            return result.AcceptVisitor(new StartVisitor&ltT&gt(remainingGuesses, guess, code));
+            return result.AcceptVisitor(
+                validGuess =&gt {
+                    var m = validGuess.Result;
+                    return m.All(r =&gt r == MatchResult.Correct)
+                        ? guess
+                        : Start(code, remainingGuesses
+                            .Skip(1)
+                            .Where(g =&gt
+                            {
+                                var r = CodeComparer.Compare(g, guess);
+                                return CompareResults(m, r);
+                            }));
+                },
+                invalidGuess =&gt { throw new InvalidOperationException(invalidGuess.Message); });
         }
 
         private static List&ltList&ltT&gt&gt GenerateGuesses&ltT&gt(int length, IEnumerable&ltT&gt options, List&ltList&ltT&gt&gt existingGuesses)
@@ -767,126 +810,6 @@ namespace MastermindCSharp
             var allGuesses = GenerateGuesses(length, options, new List&ltList&ltint&gt&gt());
             Console.WriteLine(Utils.ConvertIEnumerableOfIEnumerablesToString(allGuesses));
             Start(code, allGuesses);
-        }
-    }
-
-    internal class StartVisitor&ltT&gt : IResultVisitor&ltIEnumerable&ltT&gt&gt
-    {
-        private readonly IEnumerable&ltIEnumerable&ltT&gt&gt remainingGuesses;
-        private readonly IEnumerable&ltT&gt guess;
-        private readonly IEnumerable&ltT&gt code;
-
-        public StartVisitor(IEnumerable&ltIEnumerable&ltT&gt&gt remainingGuesses, IEnumerable&ltT&gt guess, IEnumerable&ltT&gt code)
-        {
-            this.remainingGuesses = remainingGuesses;
-            this.guess = guess;
-            this.code = code;
-        }
-
-        public IEnumerable&ltT&gt VisitValidGuess(ValidGuess validGuess)
-        {
-            var m = validGuess.Result;
-            return m.All(r =&gt r == MatchResult.Correct)
-                ? guess
-                : Game.Start(code, remainingGuesses
-                    .Skip(1)
-                    .Where(g =&gt
-                    {
-                        var r = CodeComparer.Compare(g, guess);
-                        return Game.CompareResults(m, r);
-                    }));
-        }
-
-        public IEnumerable&ltT&gt VisitInvalidGuess(InvalidGuess invalidGuess)
-        {
-            throw new InvalidOperationException(invalidGuess.Message);
-        }
-    }
-
-    internal class CompareResultsVisitor&ltT&gt : IResultVisitor&ltbool&gt
-    {
-        private readonly IEnumerable&ltT&gt result2;
-
-        public CompareResultsVisitor(IEnumerable&ltT&gt result2)
-        {
-            this.result2 = result2;
-        }
-
-        public bool VisitValidGuess(ValidGuess validGuess)
-        {
-            var m = validGuess.Result;
-            var length = m.Count;
-            return Enumerable.Range(0, length).All(i =&gt Equals(m.ElementAt(i), result2.ElementAt(i)));
-        }
-
-        public bool VisitInvalidGuess(InvalidGuess invalidGuess)
-        {
-            return false;
-        }
-    }
-
-    internal class PrintResultVisitor&ltT&gt : IResultVisitor&ltobject&gt
-    {
-        private readonly IEnumerable&ltT&gt guess;
-        private readonly IEnumerable&ltT&gt code;
-
-        public PrintResultVisitor(IEnumerable&ltT&gt guess, IEnumerable&ltT&gt code)
-        {
-            this.guess = guess;
-            this.code = code;
-        }
-
-        public object VisitValidGuess(ValidGuess validGuess)
-        {
-            Console.WriteLine($"{Utils.ConvertIEnumerableToString(guess)}, {Utils.ConvertIEnumerableToString(code)}, {Utils.ConvertIEnumerableToString(validGuess.Result)}");
-            return null;
-        }
-
-        public object VisitInvalidGuess(InvalidGuess invalidGuess)
-        {
-            Console.WriteLine($"{Utils.ConvertIEnumerableToString(guess)}, {Utils.ConvertIEnumerableToString(code)}, {Utils.ConvertIEnumerableToString(invalidGuess.Message)}");
-            return null;
-        }
-    }
-
-    internal interface IResultVisitor&ltT&gt 
-    {
-        T VisitValidGuess(ValidGuess validGuess);
-        T VisitInvalidGuess(InvalidGuess invalidGuess);
-    }
-
-    internal abstract class Option&ltT&gt
-    {
-        public abstract TResult AcceptVisitor&ltTResult&gt(IOptionVisitor&ltTResult, T&gt visitor);
-    }
-
-    internal interface IOptionVisitor&ltT, TOption&gt
-    {
-        T VisitSome(Some&ltTOption&gt some);
-        T VisitNone(None&ltTOption&gt none);
-    }
-
-    internal class Some&ltT&gt : Option&ltT&gt
-    {
-        private readonly T value;
-
-        public Some(T value)
-        {
-            this.value = value;
-        }
-        
-        public T Value =&gt value;
-        public override TResult AcceptVisitor&ltTResult&gt(IOptionVisitor&ltTResult, T&gt visitor)
-        {
-            return visitor.VisitSome(this);
-        }
-    }
-
-    internal class None&ltT&gt : Option&ltT&gt
-    {
-        public override TResult AcceptVisitor&ltTResult&gt(IOptionVisitor&ltTResult, T&gt visitor)
-        {
-            return visitor.VisitNone(this);
         }
     }
 
