@@ -266,7 +266,7 @@ The type 'Person' does not have 'null' as a proper value
 					<pre><code class="fsharp hljs" data-trim>								
 let PrintPerson person =
     match person with
-    | Some(p) -> printfn "%A" p
+    | Some p -> printfn "%A" p
     | None -> printfn "No person given" 
 
 let NullExample() = 
@@ -304,7 +304,7 @@ module Parser =
     let ReadInt() = 
         let line = Console.ReadLine()
         match TryParseInt line with
-        | Some(i) -> printfn "Successfully read integer: %i" i
+        | Some i -> printfn "Successfully read integer: %i" i
         | None -> printfn "Failed to read integer"
 					</code></pre>
 				</section>
