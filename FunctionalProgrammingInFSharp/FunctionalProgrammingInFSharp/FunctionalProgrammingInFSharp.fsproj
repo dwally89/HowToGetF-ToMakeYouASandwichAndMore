@@ -59,6 +59,7 @@
     <None Include="App.config" />
     <Content Include="packages.config" />
     <Compile Include="HelloWorld.fs" />
+    <Compile Include="MakePerson.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

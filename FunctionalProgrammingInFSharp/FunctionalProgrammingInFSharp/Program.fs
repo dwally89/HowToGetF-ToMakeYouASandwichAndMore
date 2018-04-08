@@ -4,9 +4,15 @@ open System.Text.RegularExpressions
 let processLine line = 
     let mat = Regex.Match(line, "{{ID_(.*)}}")
     if mat.Success then
-        let directory = "C:\Users\dwall\Repositories\FunctionalProgrammingInF#\FunctionalProgrammingInFSharp\FunctionalProgrammingInFSharp"
+        let solutionDir = "C:\Users\dwall\Repositories\FunctionalProgrammingInF#\FunctionalProgrammingInFSharp"
+        let fSharpDirectory = "FunctionalProgrammingInFSharp"
+        let cSharpDirectory = "CSharpCode"
         let filename = mat.Groups.[1].Value
-        Path.Combine(directory, sprintf "%s.fs" filename)
+        let path = if filename.EndsWith "CSharp" then 
+                       Path.Combine(solutionDir, cSharpDirectory, sprintf "%s.cs" (filename.Replace("_CSharp", "")))
+                   else
+                       Path.Combine(solutionDir, fSharpDirectory, sprintf "%s.fs" filename)
+        path
         |> File.ReadAllLines
         |> Array.skip 2
     else

@@ -108,45 +108,14 @@
 						</code></pre>
 						<div class="fragment">
 							<pre><code class="fsharp hljs" data-trim>
-type Person = {Name:string; Age:int;}
-
-let MakePerson name =
-    {Name=name; Age=0;}
+{{ID_MakePerson}}
 							</code></pre>
 							Equals and HashCode implemented by default!
 						</div>				
 					</div>
 					<div style="float:right;width:50%;">
 						<pre class="fragment smallCode"><code class="hljs" data-trim>	
-public class Person
-{
-    public Person(string name, int age)
-    {
-        Name = name;
-        Age = age;
-    }
-
-    public int Age { get; }
-
-    public string Name { get; }
-
-    public override bool Equals(object obj)
-    {
-        if (ReferenceEquals(null, obj)) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != this.GetType()) return false;
-        var other = (Person) obj;
-        return Age == other.Age && string.Equals(Name, other.Name);
-    }
-
-    public override int GetHashCode()
-    {
-        unchecked
-        {
-            return (Age*397) ^ (Name?.GetHashCode() ?? 0);
-        }
-    }
-}    
+{{ID_Person_CSharp}}  
 	    				</code></pre>
 	    			</div>
 				</section>

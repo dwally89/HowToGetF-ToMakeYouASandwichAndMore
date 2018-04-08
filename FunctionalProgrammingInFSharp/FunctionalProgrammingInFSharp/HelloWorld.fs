@@ -1,3 +1,3 @@
-﻿module DeleteMe
+﻿module HelloWord
 
 printfn "Hello, World!"
