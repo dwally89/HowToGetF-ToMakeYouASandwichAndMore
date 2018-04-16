@@ -62,6 +62,9 @@
     <Compile Include="MakePerson.fs" />
     <Compile Include="Person2.fs" />
     <Compile Include="CommandLineParser.fs" />
+    <Compile Include="BadNullApproach.fs" />
+    <Compile Include="GoodNullApproach.fs" />
+    <Compile Include="Parser.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

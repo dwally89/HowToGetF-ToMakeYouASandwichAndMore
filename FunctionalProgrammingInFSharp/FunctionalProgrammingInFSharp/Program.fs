@@ -1,6 +1,10 @@
 ﻿open System.IO
 open System.Text.RegularExpressions
 
+let shouldKeepLine (line:string) = 
+    not <| line.StartsWith "(*FAKECOMMENT" &&
+    not <| line.StartsWith("FAKECOMMENT*)")
+
 let processLine line = 
     let mat = Regex.Match(line, "{{ID_(.*)}}")
     if mat.Success then
@@ -14,7 +18,9 @@ let processLine line =
                        Path.Combine(solutionDir, fSharpDirectory, sprintf "%s.fs" filename)
         path
         |> File.ReadAllLines
-        |> Array.skip 2
+        |> Seq.skip 2
+        |> Seq.filter shouldKeepLine
+        |> Seq.toArray
     else
         [|line|]
 

@@ -168,14 +168,7 @@
 				
 				<section>
 					<pre><code class="fsharp hljs" data-trim>								
-let PrintPerson person = 
-    printfn "Name:%s, Age:%i" person.Name person.Age
-
-let NullExample() = 
-    PrintPerson null
-
-let RealExample() = 
-    PrintPerson {Name="Bob"; Age=52;}
+{{ID_BadNullApproach}}
 					</code></pre>
 					<div class="fragment">
 						No nulls! (except when using standard .NET types)
@@ -190,16 +183,7 @@ The type 'Person' does not have 'null' as a proper value
 
 				<section>
 					<pre><code class="fsharp hljs" data-trim>								
-let PrintPerson person =
-    match person with
-    | Some p -> printfn "%A" p
-    | None -> printfn "No person given" 
-
-let NullExample() = 
-    PrintPerson None
-
-let RealExample() =
-    PrintPerson (Some({Name="Bob"; Age=52;}))
+{{ID_GoodNullApproach}}
 					</code></pre>
 					<div class="fragment">
 						Pretty printing built in
@@ -216,22 +200,7 @@ Age = 52;}
 				<section>
 					<h2>Union types</h2>
 					<pre><code class="fsharp hljs" data-trim>	
-namespace FSharp
-
-open System
-
-module Parser = 
-    let TryParseInt value = 
-        try
-            Some(Int32.Parse value)
-        with
-        | _ -> None
-
-    let ReadInt() = 
-        let line = Console.ReadLine()
-        match TryParseInt line with
-        | Some i -> printfn "Successfully read integer: %i" i
-        | None -> printfn "Failed to read integer"
+{{ID_Parser}}
 					</code></pre>
 				</section>
 
@@ -241,42 +210,7 @@ module Parser =
 
 				<section>					
 					<pre class="smallCode"><code class="hljs" data-trim>	
-using System;
-
-namespace CSharp
-{
-    public class Parser
-    {
-        public static bool TryParseInt(string value, out int i)
-        {
-            i = 0;
-
-            try
-            {
-                i = int.Parse(value);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        public static void ReadInt()
-        {
-            var line = Console.ReadLine();
-            int i;
-            if (TryParseInt(line, out i))
-            {
-                Console.WriteLine($"Successfully read integer: {i}");
-            }
-            else
-            {
-                Console.WriteLine("Failed to read integer");
-            }
-        }
-    }
-}
+{{ID_Parser_CSharp}}
 					</code></pre>						
 				</section>
 
