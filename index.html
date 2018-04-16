@@ -125,23 +125,7 @@
 
 				<section>
 					<pre><code class="fsharp hljs" data-trim>					
-type Person = {Name:string; Age:int;}
-
-let MakePerson name =
-    {Name=name; Age=0;}
-
-// Create new person by just modifying the age
-let GrowOlder person = 
-    {person with Age=person.Age+1}
-        
-printfn "Hello, World!"
-let person1 = {Name="Bob";Age=52;}
-let person2 = {Name="Bob";Age=52;}
-
-// Print to console in a type-safe way
-printfn "%i" (person1.GetHashCode())
-printfn "%i" (person2.GetHashCode())
-printfn "%b" (person1=person2)        
+{{ID_Person2}}       
 					</code></pre>
 				</section>
 
@@ -150,17 +134,7 @@ printfn "%b" (person1=person2)
 				<section>
 					<h2>Type inference</h2>
 					<pre><code class="fsharp hljs" data-trim>	
-namespace Parser
-
-open System
-
-module CommandLineParser = 
-    let GetArgument prompt parser = 
-        printf "%s" prompt
-        Console.ReadLine() |> parser
-
-    let GetInteger() = 
-        GetArgument "Enter an integer: " Int32.Parse
+{{ID_CommandLineParser}}
 					</code></pre>
 				</section>
 
@@ -171,24 +145,7 @@ module CommandLineParser =
 				<section>	
 					<h2>Type inference</h2>	
 					<pre><code class="hljs" data-trim>	
-using System;
-
-namespace Parser
-{
-    public class CommandLineParser
-    {
-        public static T GetArgument&ltT&gt(string prompt, Func&ltstring, T&gt parser)
-        {
-            Console.Write(prompt);
-            return parser(Console.ReadLine());
-        }
-
-        public static int GetInteger()
-        {
-            return GetArgument("Enter an integer: ", int.Parse);
-        }
-    }
-}
+{{ID_CommandLineParser_CSharp}}
 					</code></pre>						
 				</section>
 

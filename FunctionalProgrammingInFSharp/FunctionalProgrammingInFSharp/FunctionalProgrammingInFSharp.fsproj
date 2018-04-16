@@ -60,6 +60,8 @@
     <Content Include="packages.config" />
     <Compile Include="HelloWorld.fs" />
     <Compile Include="MakePerson.fs" />
+    <Compile Include="Person2.fs" />
+    <Compile Include="CommandLineParser.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
