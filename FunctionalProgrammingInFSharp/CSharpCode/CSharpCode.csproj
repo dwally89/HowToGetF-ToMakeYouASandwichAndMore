@@ -43,6 +43,7 @@
     <Compile Include="CommandLineParser.cs" />
     <Compile Include="Currying.cs" />
     <Compile Include="FibLoop.cs" />
+    <Compile Include="IfStatement.cs" />
     <Compile Include="Mastermind.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Person.cs" />
