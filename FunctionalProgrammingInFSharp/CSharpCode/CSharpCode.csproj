@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandLineParser.cs" />
+    <Compile Include="Currying.cs" />
     <Compile Include="FibLoop.cs" />
     <Compile Include="Mastermind.cs" />
     <Compile Include="Parser.cs" />
