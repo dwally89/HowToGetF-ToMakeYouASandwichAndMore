@@ -79,6 +79,7 @@
     <Compile Include="Mastermind.fs" />
     <Compile Include="MakeMeASandwich.fs" />
     <Compile Include="TailRecursiveFib.fs" />
+    <Compile Include="Currying.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

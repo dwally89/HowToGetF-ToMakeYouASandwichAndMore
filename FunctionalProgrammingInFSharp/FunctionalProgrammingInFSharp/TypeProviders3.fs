@@ -7,19 +7,12 @@ let compileTimeConnectionString = "Data Source=(LocalDb)\MSSQLLocalDB;Initial Ca
 
 let prodConnectionString = "Data Source=PRDDB;Initial Catalog=SchoolDatabase;Integrated Security=SSPI;"
 
-type Student = SqlCommandProvider<"SELECT Id, FirstName, LastName
-                                   FROM dbo.Students", compileTimeConnectionString>
-
 type StudentClasses = SqlCommandProvider<"SELECT s.Id AS StudentId, s.FirstName, s.LastName, c.Id AS ClassId, c.Name ClassName
                                           FROM dbo.Students s
                                           JOIN dbo.StudentClasses sc on s.Id=sc.StudentId
                                           JOIN dbo.Classes c on c.Id=sc.ClassId", compileTimeConnectionString>
 
-let getAllStudents() = 
-    use conn = new Student(prodConnectionString)
-    conn.Execute()
-
-let example() = 
+let ``get students taking more than three classes``() = 
     use conn = new StudentClasses(prodConnectionString)
     conn.Execute()
     |> Seq.groupBy (fun sc -> (sc.StudentId, sc.FirstName, sc.LastName))
