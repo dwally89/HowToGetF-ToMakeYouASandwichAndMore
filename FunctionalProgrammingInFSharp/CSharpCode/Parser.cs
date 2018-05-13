@@ -24,8 +24,7 @@ namespace CSharp
         public static void ReadInt()
         {
             var line = Console.ReadLine();
-            int i;
-            if (TryParseInt(line, out i))
+            if (TryParseInt(line, out var i))
             {
                 Console.WriteLine($"Successfully read integer: {i}");
             }
