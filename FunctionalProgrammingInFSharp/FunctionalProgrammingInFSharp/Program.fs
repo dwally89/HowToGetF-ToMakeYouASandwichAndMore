@@ -46,7 +46,6 @@ let main argv =
     let directory = Directory.GetCurrentDirectory()
     let filename = "index"
     let extension = "html"
-    let outputPath = Path.Combine(directory, sprintf "%s_processed.%s" filename extension)
     let inputFile = Path.Combine(directory, sprintf "%s.%s" filename extension)
     let solutionDir = Path.Combine(directory,  "FunctionalProgrammingInFSharp")
     if inputFile |> File.Exists |> not then 
@@ -63,7 +62,8 @@ let main argv =
                         |> File.ReadAllLines
                         |> processLines solutionDir fSharpDirectory cSharpDirectory []
         match processed with
-        | Success lines ->                
+        | Success lines ->     
+            let outputPath = Path.Combine(directory, sprintf "%s_processed.%s" filename extension)           
             printfn "Writing processed presentation to %s" outputPath
             File.WriteAllLines(outputPath, lines)
             printfn "Finished"
