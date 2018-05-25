@@ -11,3 +11,8 @@ node_modules/
 .sass-cache
 css/reveal.min.css
 js/reveal.min.js
+packages/
+bin/
+obj/
+FunctionalProgrammingInFSharp/.vs/
+index_processed.html
